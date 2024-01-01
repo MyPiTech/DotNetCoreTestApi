@@ -10,7 +10,7 @@ namespace TestApi.Controllers
     [Route("[controller]")]
     public class EventsController : ApiControllerBase<EventsController>, ICrudController<CreateEventDto, EventDto>
     {
-        public EventsController(ILogger<EventsController> logger, PGTestDataContext dataContext) : base(logger, dataContext)
+        public EventsController(ILogger<EventsController> logger, MSTestDataContext dataContext) : base(logger, dataContext)
         {
         }
 

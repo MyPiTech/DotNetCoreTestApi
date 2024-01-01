@@ -7,8 +7,8 @@ namespace TestApi.Controllers
     public class ApiControllerBase<C> : ControllerBase where C : class
     {
         protected readonly ILogger<C> _logger;
-        protected readonly PGTestDataContext _dataContext;
-        public ApiControllerBase(ILogger<C> logger, PGTestDataContext dataContext)
+        protected readonly MSTestDataContext _dataContext;
+        public ApiControllerBase(ILogger<C> logger, MSTestDataContext dataContext)
         {
             _logger = logger;
             _dataContext = dataContext;

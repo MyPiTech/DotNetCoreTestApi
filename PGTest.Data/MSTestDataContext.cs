@@ -2,9 +2,9 @@
 
 namespace PGTest.Data
 {
-    public class PGTestDataContext : DbContext
+    public class MSTestDataContext : DbContext
     {
-        public PGTestDataContext(DbContextOptions<PGTestDataContext> options) :base(options) 
+        public MSTestDataContext(DbContextOptions<MSTestDataContext> options) :base(options) 
         { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

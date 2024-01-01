@@ -10,7 +10,7 @@ namespace TestApi.Controllers
     [Route("[controller]")]
     public class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
     {
-        public UsersController(ILogger<UsersController> logger, PGTestDataContext dataContext) : base(logger, dataContext)
+        public UsersController(ILogger<UsersController> logger, MSTestDataContext dataContext) : base(logger, dataContext)
         {
         }
 
