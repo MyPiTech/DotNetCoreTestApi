@@ -70,28 +70,37 @@ namespace TestApi.Controllers
             }
         }
 
-        /*
-         Given this method takes no parameters always returns the same type and is relatively error proof. 
-         It is an ideal method to present as an expression example. 
-         */
+
         /// <summary>
         /// Gets all users.
         /// </summary>
         /// <response code="200">No errors occurred. Users returned.</response>
+        /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<IList<UserDto>> GetAllAsync() => await _dataContext.Users
-            .Select(toDto)
-            .ToListAsync();
+        public async Task<ActionResult<IList<UserDto>>> GetAllAsync()
+        {
+            //Query syntax example.
+            var dtos = await (
+                from u in _dataContext.Users
+                select AsDto(u)
+                ).ToListAsync();
+
+            if (dtos == null) return NotFound("No users found.");
+
+            return dtos;
+        }
 
         /// <summary>
         /// Get user.
         /// </summary>
         /// <param name="id">The user Id.</param>
         /// <response code="200">No errors occurred. User returned.</response>
+        /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -122,9 +131,11 @@ namespace TestApi.Controllers
         /// <param name="userId">The user Id.</param>
         /// <param name="includeEvents">Optional parameter to include user events in response.</param>
         /// <response code="200">No errors occurred. User returned.</response>
+        /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet("Events{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
         public async Task<ActionResult<UserDto>> GetAsync(int userId, bool includeEvents = true)

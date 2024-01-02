@@ -62,22 +62,29 @@ namespace TestApi.Controllers
             }
         }
 
-        /*
-         Given this method takes no parameters always returns the same type and is relatively error proof. 
-         It is an ideal method to present as an expression example. 
-         */
         /// <summary>
         /// Gets all events.
         /// </summary>
-        /// <response code="200">No errors occurred. Users returned.</response>
+        /// <response code="200">No errors occurred. Events returned.</response>
+        /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<IList<EventDto>> GetAllAsync() => await _dataContext.Events
-            .Select(toDto)
-            .ToListAsync();
+        public async Task<ActionResult<IList<EventDto>>> GetAllAsync()
+        {
+            //Query syntax example.
+            var dtos = await (
+                from e in _dataContext.Events
+                select AsDto(e)
+                ).ToListAsync();
+
+            if (dtos == null) return NotFound("No users found.");
+
+            return dtos;
+        }
 
         /// <summary>
         /// Get event.

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TestApi.Dtos;
 
 namespace TestApi.Controllers
 {
@@ -10,7 +11,7 @@ namespace TestApi.Controllers
 
         Task<ActionResult<R>> CreateAsync(C create);
 
-        Task<IList<R>> GetAllAsync();
+        Task<ActionResult<IList<R>>> GetAllAsync();
 
         Task<ActionResult<R>> GetAsync(int id);
 
