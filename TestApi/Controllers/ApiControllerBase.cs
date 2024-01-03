@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PGTest.Data;
+using Test.Data;
 
 namespace TestApi.Controllers
 {
@@ -7,11 +7,9 @@ namespace TestApi.Controllers
     public class ApiControllerBase<C> : ControllerBase where C : class
     {
         protected readonly ILogger<C> _logger;
-        protected readonly MSTestDataContext _dataContext;
-        public ApiControllerBase(ILogger<C> logger, MSTestDataContext dataContext)
+        public ApiControllerBase(ILogger<C> logger)
         {
             _logger = logger;
-            _dataContext = dataContext;
         }
 
         /*

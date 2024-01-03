@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace PGTest.Data
+namespace Test.Data
 {
     public class MSTestDataContext : DbContext
     {

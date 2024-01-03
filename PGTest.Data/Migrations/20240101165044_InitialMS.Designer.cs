@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PGTest.Data;
+using Test.Data;
 
 #nullable disable
 
-namespace PGTest.Data.Migrations
+namespace Test.Data.Migrations
 {
     [DbContext(typeof(MSTestDataContext))]
     [Migration("20240101165044_InitialMS")]

@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PGTest.Data;
-using System.Linq.Expressions;
 using TestApi.Dtos;
+using TestApi.Services;
 
 namespace TestApi.Controllers
 {
@@ -10,95 +8,46 @@ namespace TestApi.Controllers
     [Route("[controller]")]
     public class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
     {
-        public UsersController(ILogger<UsersController> logger, MSTestDataContext dataContext) : base(logger, dataContext)
+        private readonly IUserService _service;
+
+        public UsersController(ILogger<UsersController> logger, IUserService service) : base(logger)
         {
+            _service = service;
         }
-
-        //Reusable expression tree lambda function to convert entity to dto.
-        private readonly Expression<Func<User, UserDto>> toDto = u => new UserDto { 
-            Id = u.Id, FirstName = u.FirstName, LastName = u.LastName, Notes = u.Notes
-        };
-
-        //Compile the expresssion tree and use the function.
-        private Func<User, UserDto> AsDto => toDto.Compile();
-
-        private readonly Expression<Func<User, UserDto>> toDtoWithEvents = u => new UserDto
-        {
-            Id = u.Id,
-            FirstName = u.FirstName,
-            LastName = u.LastName,
-            Notes = u.Notes,
-            Events = u.Events.Select(e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start }).ToList()
-        };
-
-        /// <summary>
-        /// Creates a new user.
-        /// </summary>
-        /// <param name="user">The user dto.</param>
-        /// <response code="201">User created.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Produces("application/json")]
-        public async Task<ActionResult<UserDto>> CreateAsync(CreateUserDto user)
-        {
-            try 
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
-                var userEntity = new User
-                {
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Notes = user.Notes
-                };
-                await _dataContext.AddAsync(userEntity);
-                await _dataContext.SaveChangesAsync();
-
-                //simple logger use example
-                _logger.LogInformation($"User: {string.Join(", ", user.LastName, user.FirstName)} Id:{userEntity.Id} created.");
-                return CreatedAtAction("Create", new { id = userEntity.Id }, AsDto(userEntity));
-            }
-            catch(Exception ex)
-            {
-                /*
-                 * Simply returning the exception message here is not ideal for a production application.
-                 * Ideally the message would be logged as well as localized and abstracted for security and control reasons. 
-                 */
-                return BadRequest(ex.Message);
-            }
-        }
-
 
         /// <summary>
         /// Gets all users.
         /// </summary>
+        /// <returns>All the UserDtos.</returns>
         /// <response code="200">No errors occurred. Users returned.</response>
-        /// <response code="404">No user found.</response>
+        /// <response code="404">No users found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<IList<UserDto>>> GetAllAsync()
+        public async Task<ActionResult<IList<UserDto>>> GetAllAsync(CancellationToken token)
         {
-            //Query syntax example.
-            var dtos = await (
-                from u in _dataContext.Users
-                select AsDto(u)
-                ).ToListAsync();
+            try
+            {
+                List<UserDto> dtos = await _service.GetAllAsync(token);
 
-            if (dtos == null) return NotFound("No users found.");
-
-            return dtos;
+                if (dtos == null) return NotFound("No users found.");
+                return dtos;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
         }
 
         /// <summary>
         /// Get user.
         /// </summary>
-        /// <param name="id">The user Id.</param>
+        /// <param name="id">The user id.</param>
+        /// <returns>The UserDto.</returns>
         /// <response code="200">No errors occurred. User returned.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -106,30 +55,29 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<UserDto>> GetAsync(int id)
+        public async Task<ActionResult<UserDto>> GetAsync(int id, CancellationToken token)
         {
             try
             {
-                var user = await _dataContext.Users
-                    .Select(toDto)
-                    .FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.GetAsync(id, token);
 
-                if (user == null) return NotFoundResult(id);
-
-                return user;
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
         /// <summary>
         /// Overloaded get user method to include user events. Made includeEvents optional
-        /// mostly to show the use of a ternary operator.
+        /// mostly to show the use of a ternary operator in the service.
         /// </summary>
-        /// <param name="userId">The user Id.</param>
+        /// <param name="id">The user id.</param>
         /// <param name="includeEvents">Optional parameter to include user events in response.</param>
+        /// <returns>The UserDto.</returns>
         /// <response code="200">No errors occurred. User returned.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -138,28 +86,55 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<UserDto>> GetAsync(int userId, bool includeEvents = true)
+        public async Task<ActionResult<UserDto>> GetAsync(int id, CancellationToken token, bool includeEvents = true)
         {
             try
             {
-                var user = await _dataContext.Users
-                    .Select(includeEvents? toDtoWithEvents : toDto)
-                    .FirstOrDefaultAsync(u => u.Id == userId);
+                var returnDto = await _service.GetAsync(id, token, includeEvents);
 
-                if (user == null) return NotFoundResult(userId);
-
-                return user;
-            } 
-            catch (Exception ex)
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
+            }
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
         /// <summary>
+        /// Creates a new user.
+        /// </summary>
+        /// <param name="createDto">The user createDto.</param>
+        /// <returns>The new UserDto.</returns>
+        /// <response code="201">User created.</response>
+        /// <response code="400">Unanticipated error occurred.</response>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
+        public async Task<ActionResult<UserDto>> CreateAsync(CreateUserDto createDto, CancellationToken token)
+        {
+            try 
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var returnDto = await _service.CreateAsync(createDto, token);
+                return CreatedAtAction("Create", new { id = returnDto.Id }, returnDto);
+            }
+            catch(Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+        }
+
+
+
+        /// <summary>
         /// Remove user.
         /// </summary>
-        /// <param name="id">The user Id.</param>
+        /// <param name="id">The user id.</param>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -168,29 +143,27 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id, CancellationToken token)
         {
             try {
-                var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+                var success = await _service.DeleteAsync(id, token);
 
-                if (user == null) return NotFoundResult(id);
-
-                _dataContext.Remove(user);
-                await _dataContext.SaveChangesAsync();
-
+                if(!success) return NotFoundResult(id);
                 return NoContent();
             }
-            catch(Exception ex)
+            catch(Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
         /// <summary>
         /// Replace user.
         /// </summary>
-        /// <param name="id">The user Id.</param>
-        /// <param name="user">The user dto.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="createDto">The user createDto.</param>
+        /// <returns>The UserDto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -199,36 +172,30 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<UserDto>> ReplaceAsync(int id, CreateUserDto user)
+        public async Task<ActionResult<UserDto>> ReplaceAsync(int id, CreateUserDto createDto, CancellationToken token)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                var userEntity = await _dataContext.Users
-                    .FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.ReplaceAsync(id, createDto, token);
 
-                if (userEntity == null) return NotFoundResult(id);
-
-                userEntity.FirstName = user.FirstName;
-                userEntity.LastName = user.LastName;
-                userEntity.Notes = user.Notes;
-
-                await _dataContext.SaveChangesAsync();
-
-                return AsDto(userEntity);   
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;   
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
         /// <summary>
         /// Update user.
         /// </summary>
-        /// <param name="id">The user Id.</param>
-        /// <param name="user">The user dto.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="updateDto">The user updateDto.</param>
+        /// <returns>The UserDto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -237,25 +204,19 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<UserDto>> UpdateAsync(int id, UserDto user)
+        public async Task<ActionResult<UserDto>> UpdateAsync(int id, UserDto updateDto, CancellationToken token)
         {
             try
             {
-                var userEntity = await _dataContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.UpdateAsync(id, updateDto, token);
 
-                if (userEntity == null) return NotFoundResult(id);
-
-                userEntity.FirstName = user.FirstName ?? userEntity.FirstName;
-                userEntity.LastName = user.LastName ?? userEntity.LastName;
-                userEntity.Notes = user.Notes ?? userEntity.Notes;
-
-                await _dataContext.SaveChangesAsync();
-
-                return AsDto(userEntity);
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
     }

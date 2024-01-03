@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PGTest.Data;
-using System.Linq.Expressions;
 using TestApi.Dtos;
+using TestApi.Services;
 
 namespace TestApi.Controllers
 {
@@ -10,61 +8,17 @@ namespace TestApi.Controllers
     [Route("[controller]")]
     public class EventsController : ApiControllerBase<EventsController>, ICrudController<CreateEventDto, EventDto>
     {
-        public EventsController(ILogger<EventsController> logger, MSTestDataContext dataContext) : base(logger, dataContext)
+
+        private readonly IService<CreateEventDto, EventDto> _service;
+        public EventsController(ILogger<EventsController> logger, IService<CreateEventDto, EventDto> service) : base(logger)
         {
-        }
-
-        //Reusable expression tree lambda function to convert entity to dto.
-        private readonly Expression<Func<Event, EventDto>> toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
-        
-        //Compile the expresssion tree and use the function.
-        private Func<Event, EventDto> AsDto => toDto.Compile();
-
-        /// <summary>
-        /// Creates a new event event.
-        /// </summary>
-        /// <param name="event">The event dto.</param>
-        /// <response code="201">User created.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Produces("application/json")]
-        public async Task<ActionResult<EventDto>> CreateAsync(CreateEventDto @event)
-        {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
-                var eventEntity = new Event
-                {
-                    UserId = @event.UserId,
-                    Title = @event.Title,
-                    Location = @event.Location,
-                    Start = @event.Start,
-                    Duration = @event.Duration
-                };
-
-                await _dataContext.AddAsync(eventEntity);
-                await _dataContext.SaveChangesAsync();
-
-                //simple logger use example
-                _logger.LogInformation($"Event: {eventEntity.Title} Id:{eventEntity.Id} created.");
-                return CreatedAtAction("Create", new { id = eventEntity.Id }, AsDto(eventEntity));
-            }
-            catch (Exception ex)
-            {
-                /*
-                 * Simply returning the exception message here is not ideal for a production application.
-                 * Ideally the message would be logged as well as localized and abstracted for security and control reasons. 
-                 */
-                return BadRequest(ex.Message);
-            }
+            _service = service;
         }
 
         /// <summary>
         /// Gets all events.
         /// </summary>
+        /// <returns>All the event dtos.</returns>
         /// <response code="200">No errors occurred. Events returned.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -73,44 +27,72 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<IList<EventDto>>> GetAllAsync()
+        public async Task<ActionResult<IList<EventDto>>> GetAllAsync(CancellationToken token)
         {
-            //Query syntax example.
-            var dtos = await (
-                from e in _dataContext.Events
-                select AsDto(e)
-                ).ToListAsync();
+            try
+            {
+                List<EventDto> dtos = await _service.GetAllAsync(token);
 
-            if (dtos == null) return NotFound("No users found.");
-
-            return dtos;
+                if (dtos == null) return NotFound("No users found.");
+                return dtos;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
         }
 
         /// <summary>
         /// Get event.
         /// </summary>
         /// <param name="id">The Event Id.</param>
+        /// <returns>The event dto.</returns>
         /// <response code="200">No errors occurred. Event returned.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<EventDto>> GetAsync(int id)
+        public async Task<ActionResult<EventDto>> GetAsync(int id, CancellationToken token)
         {
             try
             {
-                var @event = await _dataContext.Events
-                    .Select(toDto)
-                    .FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.GetAsync(id, token);
 
-                if (@event == null) return NotFoundResult(id);
-
-                return @event;
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new event.
+        /// </summary>
+        /// <param name="createDto">The event create dto.</param>
+        /// <returns>The new event dto.</returns>
+        /// <response code="201">User created.</response>
+        /// <response code="400">Unanticipated error occurred.</response>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
+        public async Task<ActionResult<EventDto>> CreateAsync(CreateEventDto createDto, CancellationToken token)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var returnDto = await _service.CreateAsync(createDto, token);
+                return CreatedAtAction("Create", new { id = returnDto.Id }, returnDto);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
@@ -126,18 +108,22 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id, CancellationToken token )
         {
             try
             {
-                var @event = await _dataContext.Events.FirstOrDefaultAsync(u => u.Id == id);
+                try
+                {
+                    var success = await _service.DeleteAsync(id, token);
 
-                if (@event == null) return NotFoundResult(id);
-
-                _dataContext.Remove(@event);
-                await _dataContext.SaveChangesAsync();
-
-                return NoContent();
+                    if (!success) return NotFoundResult(id);
+                    return NoContent();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.Message);
+                    return BadRequest(e.Message);
+                }
             }
             catch (Exception ex)
             {
@@ -149,7 +135,8 @@ namespace TestApi.Controllers
         /// Replace event.
         /// </summary>
         /// <param name="id">The Event Id.</param>
-        /// <param name="event">The event dto.</param>
+        /// <param name="event">The create event dto.</param>
+        /// <returns>The event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -158,30 +145,21 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<EventDto>> ReplaceAsync(int id, CreateEventDto @event)
+        public async Task<ActionResult<EventDto>> ReplaceAsync(int id, CreateEventDto createDto, CancellationToken token)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                var eventEntity = await _dataContext.Events
-                    .FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.ReplaceAsync(id, createDto, token);
 
-                if (eventEntity == null) return NotFoundResult(id);
-
-                eventEntity.UserId = @event.UserId;
-                eventEntity.Start = @event.Start;
-                eventEntity.Duration = @event.Duration;
-                eventEntity.Location = @event.Location;
-                eventEntity.Title = @event.Title;
-
-                await _dataContext.SaveChangesAsync();
-
-                return AsDto(eventEntity);
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
@@ -190,6 +168,7 @@ namespace TestApi.Controllers
         /// </summary>
         /// <param name="id">The event Id.</param>
         /// <param name="event">The event dto.</param>
+        /// <returns>The updated event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -198,27 +177,19 @@ namespace TestApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
-        public async Task<ActionResult<EventDto>> UpdateAsync(int id, EventDto @event)
+        public async Task<ActionResult<EventDto>> UpdateAsync(int id, EventDto updateDto, CancellationToken token)
         {
             try
             {
-                var eventEntity = await _dataContext.Events.FirstOrDefaultAsync(u => u.Id == id);
+                var returnDto = await _service.UpdateAsync(id, updateDto, token);
 
-                if (eventEntity == null) return NotFoundResult(id);
-
-                eventEntity.UserId = @event.UserId ?? eventEntity.UserId;
-                eventEntity.Start = @event.Start ?? eventEntity.Start;
-                eventEntity.Duration = @event.Duration ?? eventEntity.Duration;
-                eventEntity.Location = @event.Location ?? eventEntity.Location  ;
-                eventEntity.Title = @event.Title ?? eventEntity.Title;
-
-                await _dataContext.SaveChangesAsync();
-
-                return AsDto(eventEntity);
+                if (returnDto == null) return NotFoundResult(id);
+                return returnDto;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PGTest.Data
+namespace Test.Data
 {
     public class Event
     {

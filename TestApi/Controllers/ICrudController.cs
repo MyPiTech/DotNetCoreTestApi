@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TestApi.Dtos;
 
 namespace TestApi.Controllers
 {
@@ -9,16 +8,16 @@ namespace TestApi.Controllers
         where R : class
     {
 
-        Task<ActionResult<R>> CreateAsync(C create);
+        Task<ActionResult<IList<R>>> GetAllAsync(CancellationToken token);
 
-        Task<ActionResult<IList<R>>> GetAllAsync();
+        Task<ActionResult<R>> GetAsync(int id, CancellationToken token);
 
-        Task<ActionResult<R>> GetAsync(int id);
+        Task<ActionResult<R>> CreateAsync(C create, CancellationToken token);
 
-        Task<ActionResult> DeleteAsync(int id);
+        Task<ActionResult> DeleteAsync(int id, CancellationToken token);
 
-        Task<ActionResult<R>> ReplaceAsync(int id, C replace);
+        Task<ActionResult<R>> ReplaceAsync(int id, C replace, CancellationToken token);
 
-        Task<ActionResult<R>> UpdateAsync(int id, R update);
+        Task<ActionResult<R>> UpdateAsync(int id, R update, CancellationToken token);
     }
 }

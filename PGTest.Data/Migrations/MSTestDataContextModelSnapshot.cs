@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PGTest.Data;
+using Test.Data;
 
 #nullable disable
 
-namespace PGTest.Data.Migrations
+namespace Test.Data.Migrations
 {
     [DbContext(typeof(MSTestDataContext))]
     partial class MSTestDataContextModelSnapshot : ModelSnapshot

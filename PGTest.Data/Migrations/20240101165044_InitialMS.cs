@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PGTest.Data.Migrations
+namespace Test.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMS : Migration
