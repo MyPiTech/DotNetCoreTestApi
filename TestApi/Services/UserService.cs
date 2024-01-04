@@ -5,7 +5,7 @@ using TestApi.Dtos;
 
 namespace TestApi.Services
 {
-    public class UserService : IUserService
+    public class UserService : IService<User, CreateUserDto, UserDto>
     {
         private readonly MSTestDataContext _dataContext;
         private readonly ILogger<UserService> _logger;
@@ -19,17 +19,15 @@ namespace TestApi.Services
             Notes = u.Notes
         };
 
-        private readonly Expression<Func<User, UserDto>> toDtoWithEvents = u => new UserDto
-        {
-            Id = u.Id,
-            FirstName = u.FirstName,
-            LastName = u.LastName,
-            Notes = u.Notes,
-            Events = u.Events.Select(e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start }).ToList()
-        };
-
         //Compile the expresssion tree toDto and use the function.
         private Func<User, UserDto> AsDto => toDto.Compile();
+
+        private IQueryable<UserDto> Dtos(Expression<Func<User, bool>>? predicate = null)
+        {
+            var baseQ = _dataContext.Users.AsQueryable();
+            if (predicate != null) baseQ = baseQ.Where(predicate);
+            return baseQ.Select(toDto);
+        }
 
         public UserService(ILogger<UserService> logger, MSTestDataContext dataContext)
         {
@@ -37,146 +35,68 @@ namespace TestApi.Services
             _logger = logger;
         }
 
-        public async Task<List<UserDto>> GetAllAsync(CancellationToken token)
+        public async Task<List<UserDto>> GetAllAsync(Expression<Func<User, bool>>? predicate, CancellationToken token)
         {
-            try {
-                //Query syntax example.
-                var dtos = await (
-                    from u in _dataContext.Users
-                    select AsDto(u)
-                    ).ToListAsync(token);
-                return dtos;
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw; 
-            }
-            
+            return await Dtos().ToListAsync(token);
         }
 
-        public async Task<UserDto?> GetAsync(int id, CancellationToken token)
+        public async Task<UserDto?> GetAsync(Expression<Func<User, bool>> predicate, CancellationToken token)
         {
-            try
-            {
-                var returnDto = await _dataContext.Users
-                    .Select(toDto)
-                    .FirstOrDefaultAsync(u => u.Id == id, token);
-
-                return returnDto;
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
+            return await Dtos(predicate).FirstOrDefaultAsync(token);
         }
 
-        public async Task<UserDto?> GetAsync(int id, CancellationToken token, bool includeEvents = true)
+        public async Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken token, int? parentId = null)
         {
-            try
+            var entity = new User
             {
-                var returnDto = await _dataContext.Users
-                    .Select(includeEvents ? toDtoWithEvents : toDto)
-                    .FirstOrDefaultAsync(u => u.Id == id, token);
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Notes = dto.Notes
+            };
+            await _dataContext.AddAsync(entity, token);
+            await _dataContext.SaveChangesAsync(token);
 
-                return returnDto;
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
-
+            _logger.LogInformation($"User: {string.Join(", ", dto.LastName, dto.FirstName)} Id:{entity.Id} created.");
+            return AsDto(entity);
         }
 
-        public async Task<UserDto> CreateAsync(CreateUserDto createDto, CancellationToken token)
+        public async Task DeleteAsync(Expression<Func<User, bool>> predicate, CancellationToken token)
         {
-            try
-            {
-                var entity = new User
-                {
-                    FirstName = createDto.FirstName,
-                    LastName = createDto.LastName,
-                    Notes = createDto.Notes
-                };
-                await _dataContext.AddAsync(entity, token);
-                await _dataContext.SaveChangesAsync(token);
+            var entity = await _dataContext.Users.FirstOrDefaultAsync(predicate, token);
 
-                _logger.LogInformation($"User: {string.Join(", ", createDto.LastName, createDto.FirstName)} Id:{entity.Id} created.");
-                return AsDto(entity);
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
+            if (entity == null) throw new ArgumentException("Invalid identifier.");
+
+            _dataContext.Remove(entity);
+            await _dataContext.SaveChangesAsync(token);
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken token)
+        public async Task<UserDto> ReplaceAsync(Expression<Func<User, bool>> predicate, CreateUserDto dto, CancellationToken token)
         {
-            try
-            {
-                var entity = await _dataContext.Users.FirstOrDefaultAsync(u => u.Id == id, token);
-                if (entity == null) return false;
+            var entity = await _dataContext.Users.FirstOrDefaultAsync(predicate, token);
 
-                _dataContext.Remove(entity);
-                await _dataContext.SaveChangesAsync(token);
-                return true;
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
+            if(entity == null) throw new ArgumentException("Invalid identifier.");
+
+            entity.FirstName = dto.FirstName;
+            entity.LastName = dto.LastName;
+            entity.Notes = dto.Notes;
+
+            await _dataContext.SaveChangesAsync(token);
+
+            return AsDto(entity);
         }
 
-        public async Task<UserDto?> ReplaceAsync(int id, CreateUserDto createDto, CancellationToken token)
+        public async Task<UserDto> UpdateAsync(Expression<Func<User, bool>> predicate, CreateUserDto dto, CancellationToken token)
         {
-            try
-            {
-                var entity = await _dataContext.Users
-                    .FirstOrDefaultAsync(u => u.Id == id, token);
+            var entity = await _dataContext.Users.FirstOrDefaultAsync(predicate, token);
 
-                if (entity == null) return null;
+            if (entity == null) throw new ArgumentException("Invalid identifier.");
 
-                entity.FirstName = createDto.FirstName;
-                entity.LastName = createDto.LastName;
-                entity.Notes = createDto.Notes;
+            entity.FirstName = dto.FirstName;
+            entity.LastName = dto.LastName;
+            entity.Notes = dto.Notes ?? entity.Notes;
 
-                await _dataContext.SaveChangesAsync(token);
-
-                return AsDto(entity);
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
-        }
-
-        public async Task<UserDto?> UpdateAsync(int id, UserDto updateDto, CancellationToken token)
-        {
-            try
-            {
-                var entity = await _dataContext.Users.FirstOrDefaultAsync(u => u.Id == id, token);
-
-                if (entity == null) return null;
-
-                //Ternary operators might be more efficient...
-                entity.FirstName = updateDto.FirstName ?? entity.FirstName;
-                entity.LastName = updateDto.LastName ?? entity.LastName;
-                entity.Notes = updateDto.Notes ?? entity.Notes;
-
-                await _dataContext.SaveChangesAsync(token);
-
-                return AsDto(entity);
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.LogError(e.Message);
-                throw;
-            }
+            await _dataContext.SaveChangesAsync(token);
+            return AsDto(entity);
         }
     }
 }

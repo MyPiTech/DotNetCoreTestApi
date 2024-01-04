@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace TestApi.Dtos
+﻿namespace TestApi.Dtos
 {
     public class UserDto
     {
@@ -8,7 +6,5 @@ namespace TestApi.Dtos
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Notes { get; set; }
-
-        public IList<EventDto> ?Events { get; set; }
     }
 }

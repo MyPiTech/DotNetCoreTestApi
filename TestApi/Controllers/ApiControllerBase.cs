@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Test.Data;
 
 namespace TestApi.Controllers
 {
@@ -17,5 +16,7 @@ namespace TestApi.Controllers
          Also creates a convenient point for future localization.
          */
         protected ActionResult NotFoundResult(int id) => NotFound($"Id: {id} was not found.");
+
+        protected ActionResult NoneFoundResult => NotFound($"No records were found.");
     }
 }

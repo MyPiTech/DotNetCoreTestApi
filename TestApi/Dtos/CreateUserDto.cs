@@ -9,5 +9,6 @@ namespace TestApi.Dtos
         [Required]
         public string LastName { get; set; }
         public string Notes { get; set; }
+
     }
 }

@@ -9,8 +9,9 @@ builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializ
 
 // Add services to the container.
 builder.Services.AddDbContext<MSTestDataContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("MSTestConnectionString")));
-builder.Services.AddTransient<IUserService, UserService>();
-builder.Services.AddTransient<IService<CreateEventDto, EventDto>, EventService>();
+builder.Services.AddTransient<IService<User, CreateUserDto, UserDto>, UserService>();
+builder.Services.AddTransient<IService<Event, CreateEventDto, EventDto>, EventService>();
+builder.Services.AddTransient<IService<Event, CreateUserEventDto, EventDto>, UserEventService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

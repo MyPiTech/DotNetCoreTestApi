@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Test.Data;
 using System.Linq.Expressions;
+using Test.Data;
 using TestApi.Dtos;
 
 namespace TestApi.Services
 {
-    public class EventService : IService<Event, CreateEventDto, EventDto>
+    public class UserEventService : IService<Event, CreateUserEventDto, EventDto>
     {
         private readonly MSTestDataContext _dataContext;
-        private readonly ILogger<EventService> _logger;
+        private readonly ILogger<UserEventService> _logger;
 
         //Reusable expression tree lambda function to convert entity to dto.
         private readonly Expression<Func<Event, EventDto>> toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
@@ -23,27 +23,18 @@ namespace TestApi.Services
             return baseQ.Select(toDto);
         }
 
-        public EventService(ILogger<EventService> logger, MSTestDataContext dataContext)
+        public UserEventService(ILogger<UserEventService> logger, MSTestDataContext dataContext)
         {
             _dataContext = dataContext;
             _logger = logger;
         }
-
-        public async Task<List<EventDto>> GetAllAsync(Expression<Func<Event, bool>>? predicate, CancellationToken token)
+        public async Task<EventDto> CreateAsync(CreateUserEventDto dto, CancellationToken token, int? parentId = null)
         {
-            return await Dtos().ToListAsync(token);
-        }
+            if(parentId == null) throw new ArgumentNullException(nameof(parentId));
 
-        public async Task<EventDto?> GetAsync(Expression<Func<Event, bool>> predicate, CancellationToken token)
-        {
-            return await Dtos(predicate).FirstOrDefaultAsync(token);
-        }
-
-        public async Task<EventDto> CreateAsync(CreateEventDto dto, CancellationToken token, int? parentId = null)
-        {
             var entity = new Event
             {
-                UserId = dto.UserId,
+                UserId = parentId.Value,
                 Title = dto.Title,
                 Location = dto.Location,
                 Start = dto.Start,
@@ -67,13 +58,26 @@ namespace TestApi.Services
             await _dataContext.SaveChangesAsync(token);
         }
 
-        public async Task<EventDto> ReplaceAsync(Expression<Func<Event, bool>> predicate, CreateEventDto dto, CancellationToken token)
+        public async Task<List<EventDto>> GetAllAsync(Expression<Func<Event, bool>>? predicate, CancellationToken token)
+        {
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+
+            return await Dtos(predicate).ToListAsync(token);
+        }
+
+        public async Task<EventDto?> GetAsync(Expression<Func<Event, bool>> predicate, CancellationToken token)
+        {
+            var dto = await Dtos(predicate).FirstOrDefaultAsync(token);
+            if (dto == null) throw new ArgumentException("Invalid identifier.");
+            return dto;
+        }
+
+        public async Task<EventDto> ReplaceAsync(Expression<Func<Event, bool>> predicate, CreateUserEventDto dto, CancellationToken token)
         {
             var entity = await _dataContext.Events.FirstOrDefaultAsync(predicate, token);
 
             if (entity == null) throw new ArgumentException("Invalid identifier.");
 
-            entity.UserId = dto.UserId;
             entity.Start = dto.Start;
             entity.Duration = dto.Duration;
             entity.Location = dto.Location;
@@ -84,17 +88,16 @@ namespace TestApi.Services
             return AsDto(entity);
         }
 
-        public async Task<EventDto> UpdateAsync(Expression<Func<Event, bool>> predicate, CreateEventDto dto, CancellationToken token)
+        public async Task<EventDto> UpdateAsync(Expression<Func<Event, bool>> predicate, CreateUserEventDto dto, CancellationToken token)
         {
             var entity = await _dataContext.Events.FirstOrDefaultAsync(predicate, token);
 
             if (entity == null) throw new ArgumentException("Invalid identifier.");
 
-            entity.UserId = dto.UserId;
-            entity.Title = dto.Title;
             entity.Start = dto.Start;
             entity.Duration = dto.Duration;
             entity.Location = dto.Location ?? entity.Location;
+            entity.Title = dto.Title ?? entity.Title;
 
             await _dataContext.SaveChangesAsync(token);
 

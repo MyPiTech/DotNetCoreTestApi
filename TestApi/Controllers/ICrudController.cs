@@ -18,6 +18,6 @@ namespace TestApi.Controllers
 
         Task<ActionResult<R>> ReplaceAsync(int id, C replace, CancellationToken token);
 
-        Task<ActionResult<R>> UpdateAsync(int id, R update, CancellationToken token);
+        Task<ActionResult<R>> UpdateAsync(int id, C update, CancellationToken token);
     }
 }
