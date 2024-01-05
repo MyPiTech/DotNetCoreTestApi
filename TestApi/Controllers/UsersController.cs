@@ -21,7 +21,8 @@ namespace TestApi.Controllers
         /// <summary>
         /// Gets all users.
         /// </summary>
-        /// <returns>All the UserDtos.</returns>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>All the user dtos.</returns>
         /// <response code="200">No errors occurred. Users returned.</response>
         /// <response code="404">No users found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -47,10 +48,11 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Get user.
+        /// Get a user.
         /// </summary>
         /// <param name="id">The user id.</param>
-        /// <returns>The UserDto.</returns>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The user dto.</returns>
         /// <response code="200">No errors occurred. User returned.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -78,7 +80,8 @@ namespace TestApi.Controllers
         /// Creates a new user.
         /// </summary>
         /// <param name="dto">The user createDto.</param>
-        /// <returns>The new UserDto.</returns>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The new user dto.</returns>
         /// <response code="201">User created.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpPost]
@@ -104,9 +107,10 @@ namespace TestApi.Controllers
 
 
         /// <summary>
-        /// Remove user.
+        /// Delete a user.
         /// </summary>
         /// <param name="id">The user id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -129,11 +133,12 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Replace user.
+        /// Replace a user.
         /// </summary>
         /// <param name="id">The user id.</param>
-        /// <param name="dto">The user createDto.</param>
-        /// <returns>The UserDto.</returns>
+        /// <param name="dto">The create user dto.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The user dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -157,11 +162,12 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Update user.
+        /// Update a user.
         /// </summary>
         /// <param name="id">The user id.</param>
-        /// <param name="dto">The user updateDto.</param>
-        /// <returns>The UserDto.</returns>
+        /// <param name="dto">The create user dto.</param>
+        /// <param name="token">The cancellation token.</param>
+        /// <returns>The user dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No user found.</response>
         /// <response code="400">Unanticipated error occurred.</response>

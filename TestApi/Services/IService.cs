@@ -1,13 +1,12 @@
 ﻿using System.Linq.Expressions;
-using Test.Data;
 
 namespace TestApi.Services
 {
     //Simple interface to demonstrate polymorphism and generics.
     public interface IService<E, C, R>
-        where E : class
-        where C : class
-        where R : class
+        where E : class //db entity
+        where C : class //create dto
+        where R : class //return dto
     {
         Task<List<R>> GetAllAsync(Expression<Func<E, bool>>? predicate, CancellationToken token);
 

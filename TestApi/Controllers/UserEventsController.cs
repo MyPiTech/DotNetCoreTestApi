@@ -6,10 +6,12 @@ namespace TestApi.Controllers
     public partial class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
     {
         /// <summary>
-        /// Gets all events.
+        /// Gets all user events.
         /// </summary>
+        /// <param name="id">The user id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>All the event dtos.</returns>
-        /// <response code="200">No errors occurred. Events returned.</response>
+        /// <response code="200">No errors occurred. User events returned.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpGet("{id}/Events")]
@@ -34,9 +36,11 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Get event.
-        /// </summary>
-        /// <param name="id">The Event Id.</param>
+        /// Get a user event.
+        /// </summary>     
+        /// <param name="id">The user id.</param>
+        /// <param name="eventId">The event id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The event dto.</returns>
         /// <response code="200">No errors occurred. Event returned.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -60,11 +64,13 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Creates a new event.
+        /// Creates a new user event.
         /// </summary>
-        /// <param name="dto">The event create dto.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="dto">The create user event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The new event dto.</returns>
-        /// <response code="201">User created.</response>
+        /// <response code="201">Event created.</response>
         /// <response code="400">Unanticipated error occurred.</response>
         [HttpPost("{id}/Events")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -87,9 +93,11 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Remove event.
+        /// Delete a user event.
         /// </summary>
-        /// <param name="id">The Event Id.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="eventId">The event id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -113,10 +121,12 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Replace event.
+        /// Replace a user event.
         /// </summary>
-        /// <param name="id">The Event Id.</param>
-        /// <param name="event">The create event dto.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="eventId">The event id.</param>
+        /// <param name="dto">The create user event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
@@ -141,10 +151,12 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Update event.
+        /// Update a user event.
         /// </summary>
-        /// <param name="id">The event Id.</param>
-        /// <param name="event">The event dto.</param>
+        /// <param name="id">The user id.</param>
+        /// <param name="eventId">The event id.</param>
+        /// <param name="dto">The create user event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The updated event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>

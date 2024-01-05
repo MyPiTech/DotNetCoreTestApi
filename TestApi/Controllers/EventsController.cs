@@ -19,6 +19,7 @@ namespace TestApi.Controllers
         /// <summary>
         /// Gets all events.
         /// </summary>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>All the event dtos.</returns>
         /// <response code="200">No errors occurred. Events returned.</response>
         /// <response code="404">No event found.</response>
@@ -45,9 +46,10 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Get event.
+        /// Get an event.
         /// </summary>
-        /// <param name="id">The Event Id.</param>
+        /// <param name="id">The event id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The event dto.</returns>
         /// <response code="200">No errors occurred. Event returned.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -74,7 +76,8 @@ namespace TestApi.Controllers
         /// <summary>
         /// Creates a new event.
         /// </summary>
-        /// <param name="createDto">The event create dto.</param>
+        /// <param name="dto">The create event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The new event dto.</returns>
         /// <response code="201">User created.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -99,9 +102,10 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Remove event.
+        /// Delete an event.
         /// </summary>
-        /// <param name="id">The Event Id.</param>
+        /// <param name="id">The event id.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
         /// <response code="400">Unanticipated error occurred.</response>
@@ -125,10 +129,11 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Replace event.
+        /// Replace an event.
         /// </summary>
-        /// <param name="id">The Event Id.</param>
-        /// <param name="event">The create event dto.</param>
+        /// <param name="id">The event id.</param>
+        /// <param name="dto">The create event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>
@@ -153,10 +158,11 @@ namespace TestApi.Controllers
         }
 
         /// <summary>
-        /// Update event.
+        /// Update an event.
         /// </summary>
-        /// <param name="id">The event Id.</param>
-        /// <param name="event">The event dto.</param>
+        /// <param name="id">The event id.</param>
+        /// <param name="dto">The create event dto.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The updated event dto.</returns>
         /// <response code="204">No errors occurred.</response>
         /// <response code="404">No event found.</response>

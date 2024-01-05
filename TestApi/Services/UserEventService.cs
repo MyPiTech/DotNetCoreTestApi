@@ -28,6 +28,7 @@ namespace TestApi.Services
             _dataContext = dataContext;
             _logger = logger;
         }
+
         public async Task<EventDto> CreateAsync(CreateUserEventDto dto, CancellationToken token, int? parentId = null)
         {
             if(parentId == null) throw new ArgumentNullException(nameof(parentId));
