@@ -79,7 +79,7 @@ namespace TestApi.Controllers
         /// <summary>
         /// Creates a new user.
         /// </summary>
-        /// <param name="dto">The user createDto.</param>
+        /// <param name="dto">The create user dto.</param>
         /// <param name="token">The cancellation token.</param>
         /// <returns>The new user dto.</returns>
         /// <response code="201">User created.</response>
