@@ -6,13 +6,23 @@ As stated in the Swagger UI located [here](https://swcoretestapi.azurewebsites.n
 That said, I think it might be important to give an overview of what I did and why.
 
 ### Basic Tech Stack
-- Target Framework .NET 6.0
+- Target Framework: .NET 6.0 (Core)
 - MSSQL \- Originally PostgreSQL
 - IDE \- Microsoft Visual Studio Community 2022 
 - ORM \- Entity Framework Core (7.0.11)
 - Azure \- SQL server, database and app service for publishing
 - Git \- Version\\Source Control
 
+## Things to do better
+Were this intended as a production application it would include a few things I left out. From an archtectual standpoint this is a 2-tiered application. The request\\response layer and a service layer. Normally I would have included a dedicated data access layer as well, but given the limited scope of this app I simply combined the service and DAL layers. Not the best approach for separation of concerns, persistence ignorance, or single responsibility adherence. 
 
+From a design standpoint, the first thing missing is authentication and authorization control. While leaving this out does simplify the implementation. I mainly wanted the API to be accessible to the public. So it seemed like an unnecessary complication. Again, given the scope and intended use of the API.
 
+Internationalization and localization (I18n, L10n) are also design concerns in most production applications these days. APIs are often but not always immune to these concerns. I intentionally ignored this here as unnecessary. 
 
+Developer documentation was limited to the needs of Swagger. Ideally, every method and property would be documented not just the ones that impact the Swagger UI. In addition, a robust unti testing implementation is ideal but was left out here.
+
+Error handling while present is not quite up to my standards. In particular, post-model state validation is lacking. I will likely improve on error handling  as the frontends become dependent on the API, and it becomes a more immediate concern.
+
+## Things done well
+more to come...
