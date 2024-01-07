@@ -1,7 +1,7 @@
 # TestApi
 Thank you for taking the time to explore this repository. 
 
-As stated in the Swagger UI located [here](https://swcoretestapi.azurewebsites.net/swagger/index.html). This code is not intended to be production-ready. There are a number of shortcuts and a certain lack of adherence to architectural principles. In my defense, this API is intended more to show my C# skill set rather than my understanding of application architecture. It will be used as the backend for a number of potential frontend tech stacks. The purpose of which is to keep my skill set current and to improve my skills as I pursue employment opportunities.
+As stated in the Swagger UI located <a href="https://swcoretestapi.azurewebsites.net/swagger/index.html" target="_blank">here</a>. This code is not intended to be production-ready. There are a number of shortcuts and a certain lack of adherence to architectural principles. In my defense, this API is intended more to show my C# skill set rather than my understanding of application architecture. It will be used as the backend for a number of potential frontend tech stacks. The purpose of which is to improve my skills and keep them current as I pursue employment opportunities.
 
 That said, I think it might be important to give an overview of what I did and why.
 
@@ -15,19 +15,23 @@ That said, I think it might be important to give an overview of what I did and w
 
 
 ## Things done well
-All core principles of OOP including abstraction, polymorphism, inheritance and encapsulation (APIE) should have good representations in the code base. Use of generics in inheritance and polymorphism gives a good example of how these coupled with the DRY principle can improve extensibility, code reuse and best practices. IOC is used consistently both to maintain loose coupling and to adhere to the explicit dependency principle. The async multithreading pattern is used and extended to EF's asynchronous methods to protect performance. 
+All core principles of OOP including abstraction, polymorphism, inheritance and encapsulation (APIE) should have good representations in the code base. 
+
+Use of generics improves extensibility, and code reuse. 
+
+Dependancy injection adheres to IOC. 
+
+The task-based asynchronous pattern (TAP) is used consistently. 
 
 ## Things to do better
-Were this intended as a production application it would include a few things I left out. From an archtectual standpoint this is a 2-tiered application. The request\\response layer and a service layer. Normally I would have included a dedicated data access layer as well, but given the limited scope of this app I simply combined the service and DAL layers. Not the best approach for separation of concerns, persistence ignorance, or single responsibility adherence. 
+From an archtectual standpoint this is a tiered application. The request\\response (UI) layer and a service layer (BLL). Normally I would have included a dedicated data access layer as well, but given the limited scope of this app I simply combined the BLL and DAL layers.
 
-From a design standpoint, the first thing missing is authentication and authorization control. While leaving this out does simplify the implementation. I mainly wanted the API to be accessible to the public. So it seemed like an unnecessary complication. Again, given the scope and intended use of the API.
+Authentication and authorization is nonexistent. I wanted the API to be accessible to the public. So it seemed like an unnecessary complication.
 
-Internationalization and localization (I18n, L10n) are also design concerns in most production applications these days. APIs are often but not always immune to these concerns. I intentionally ignored this here as unnecessary. 
+Internationalization and localization (I18n, L10n) are also design concerns. I intentionally ignored this here as unnecessary. 
 
-Developer documentation was limited to the needs of Swagger. Ideally, every method and property would be documented not just the ones that impact the Swagger UI. In addition, a robust unit testing implementation is ideal but was left out here.
+Code comments were limited to the needs of Swagger. Ideally, every method would be commented not just the ones that impact the Swagger UI. In addition, a robust unit testing framework is ideal but was left out here.
 
-Error handling while present is not quite up to my standards. In particular, post-model state validation is lacking. I will likely improve on error handling  as the frontends become dependent on the API, and it becomes a more immediate concern.
-
-Explicitly defining database transactions around insert, update, and delete operations is often necessary in a production implementations. EF does a fairly good job of handling this in simple cases, and it seemed unnecessary here. 
+Error handling while present is not quite up to my standards. In particular, post model state validation is lacking. I will likely improve on error handling as the frontends become dependent on the API, and it becomes a more immediate concern.
 
 Logging could be improved.
