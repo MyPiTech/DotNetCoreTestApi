@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PGTest.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace Test.Data
 {
-    public class Event
+    public class Event : Entity
     {
-        public int Id { get; set; }
         [Required]
         public string Title { get; set; }
         public string Location { get; set; }

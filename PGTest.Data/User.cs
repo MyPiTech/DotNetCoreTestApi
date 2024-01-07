@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PGTest.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace Test.Data
 {
-    public class User
+    public class User : Entity
     {
-        public int Id { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]

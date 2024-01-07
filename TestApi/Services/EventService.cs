@@ -5,28 +5,11 @@ using TestApi.Dtos;
 
 namespace TestApi.Services
 {
-    public class EventService : IService<Event, CreateEventDto, EventDto>
+    public class EventService : Service<EventService, Event, EventDto>, IService<Event, CreateEventDto, EventDto>
     {
-        private readonly MSTestDataContext _dataContext;
-        private readonly ILogger<EventService> _logger;
-
-        //Reusable expression tree lambda function to convert entity to dto.
-        private readonly Expression<Func<Event, EventDto>> toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
-
-        //Compile the expresssion tree and use the function.
-        private Func<Event, EventDto> AsDto => toDto.Compile();
-
-        private IQueryable<EventDto> Dtos(Expression<Func<Event, bool>>? predicate = null)
+        public EventService(ILogger<EventService> logger, MSTestDataContext dataContext) : base(logger, dataContext)
         {
-            var baseQ = _dataContext.Events.AsQueryable();
-            if (predicate != null) baseQ = baseQ.Where(predicate);
-            return baseQ.Select(toDto);
-        }
-
-        public EventService(ILogger<EventService> logger, MSTestDataContext dataContext)
-        {
-            _dataContext = dataContext;
-            _logger = logger;
+            _toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
         }
 
         public async Task<List<EventDto>> GetAllAsync(Expression<Func<Event, bool>>? predicate, CancellationToken token)
@@ -41,6 +24,8 @@ namespace TestApi.Services
 
         public async Task<EventDto> CreateAsync(CreateEventDto dto, CancellationToken token, int? parentId = null)
         {
+            if (!await ValidateParentAsync<User>(u => u.Id == dto.UserId, token)) throw new ArgumentOutOfRangeException("Invalid parent id.");
+
             var entity = new Event
             {
                 UserId = dto.UserId,

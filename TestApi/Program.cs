@@ -29,10 +29,8 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Title = "Test API",
         Description = "A test ASP.NET Core Web API for managing users and user events." +
-        "<br><br> This is not production-ready and lacks several things you would expect to see in a production API." +
-        "<br> Most notably authentication and authorization. In addition error handling, documentation and testing" +
-        "<br> could all be improved. Also most RESTful APIs would not expose Events twice. Since they represent a" +
-        "<br> many-to-one relationship with users. Finally I18n and I10n are often required in production apps." +
+        "<br><br> This is not production-ready." +
+        "<br> Please see the source repository for more information." +
         " <br><br><a target=”_blank” href=\"https://github.com/MyPiTech/DotNetCoreTestApi\">Source Repository</a><br>",
         Contact = new OpenApiContact
         {

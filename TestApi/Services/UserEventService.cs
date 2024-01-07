@@ -5,33 +5,17 @@ using TestApi.Dtos;
 
 namespace TestApi.Services
 {
-    public class UserEventService : IService<Event, CreateUserEventDto, EventDto>
+    public class UserEventService : Service<UserEventService, Event, EventDto>, IService<Event, CreateUserEventDto, EventDto>
     {
-        private readonly MSTestDataContext _dataContext;
-        private readonly ILogger<UserEventService> _logger;
-
-        //Reusable expression tree lambda function to convert entity to dto.
-        private readonly Expression<Func<Event, EventDto>> toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
-
-        //Compile the expresssion tree and use the function.
-        private Func<Event, EventDto> AsDto => toDto.Compile();
-
-        private IQueryable<EventDto> Dtos(Expression<Func<Event, bool>>? predicate = null)
+        public UserEventService(ILogger<UserEventService> logger, MSTestDataContext dataContext) : base(logger, dataContext)
         {
-            var baseQ = _dataContext.Events.AsQueryable();
-            if (predicate != null) baseQ = baseQ.Where(predicate);
-            return baseQ.Select(toDto);
-        }
-
-        public UserEventService(ILogger<UserEventService> logger, MSTestDataContext dataContext)
-        {
-            _dataContext = dataContext;
-            _logger = logger;
+            _toDto = e => new EventDto { Id = e.Id, Title = e.Title, Duration = e.Duration, Location = e.Location, Start = e.Start, UserId = e.UserId };
         }
 
         public async Task<EventDto> CreateAsync(CreateUserEventDto dto, CancellationToken token, int? parentId = null)
         {
             if(parentId == null) throw new ArgumentNullException(nameof(parentId));
+            if (!await ValidateParentAsync<User>(u => u.Id == parentId.Value, token)) throw new ArgumentOutOfRangeException(nameof(parentId));
 
             var entity = new Event
             {
@@ -53,7 +37,7 @@ namespace TestApi.Services
         {
             var entity = await _dataContext.Events.FirstOrDefaultAsync(predicate, token);
 
-            if (entity == null) throw new ArgumentException("Invalid identifier.");
+            if (entity == null) throw new ArgumentOutOfRangeException("Invalid identifier.");
 
             _dataContext.Remove(entity);
             await _dataContext.SaveChangesAsync(token);
@@ -69,15 +53,14 @@ namespace TestApi.Services
         public async Task<EventDto?> GetAsync(Expression<Func<Event, bool>> predicate, CancellationToken token)
         {
             var dto = await Dtos(predicate).FirstOrDefaultAsync(token);
-            if (dto == null) throw new ArgumentException("Invalid identifier.");
+            if (dto == null) throw new ArgumentOutOfRangeException("Invalid identifier.");
             return dto;
         }
 
         public async Task<EventDto> ReplaceAsync(Expression<Func<Event, bool>> predicate, CreateUserEventDto dto, CancellationToken token)
         {
             var entity = await _dataContext.Events.FirstOrDefaultAsync(predicate, token);
-
-            if (entity == null) throw new ArgumentException("Invalid identifier.");
+            if (entity == null) throw new ArgumentOutOfRangeException("Invalid identifier.");
 
             entity.Start = dto.Start;
             entity.Duration = dto.Duration;
@@ -93,7 +76,7 @@ namespace TestApi.Services
         {
             var entity = await _dataContext.Events.FirstOrDefaultAsync(predicate, token);
 
-            if (entity == null) throw new ArgumentException("Invalid identifier.");
+            if (entity == null) throw new ArgumentOutOfRangeException("Invalid identifier.");
 
             entity.Start = dto.Start;
             entity.Duration = dto.Duration;
@@ -104,5 +87,7 @@ namespace TestApi.Services
 
             return AsDto(entity);
         }
+
+        
     }
 }
