@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace TestApi.Dtos
+﻿namespace TestApi.Dtos
 {
     public class EventDto
     {

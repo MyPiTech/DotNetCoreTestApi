@@ -37,7 +37,6 @@ builder.Services.AddSwaggerGen(options =>
             Name = "Shawn Wheeler",
             Email = "swheeler1974@gmail.com",
             Url = new Uri("https://www.linkedin.com/in/shawn-wheeler-5850a956/")
-            
         }
     });
 
