@@ -5,10 +5,12 @@ namespace TestApi.Dtos
     public class CreateUserDto
     {
         [Required]
-        public string FirstName { get; set; }
+		[StringLength(20)]
+		public string FirstName { get; set; }
         [Required]
-        public string LastName { get; set; }
-        public string Notes { get; set; }
-
+		[StringLength(20)]
+		public string LastName { get; set; }
+		[StringLength(500)]
+		public string Notes { get; set; }
     }
 }

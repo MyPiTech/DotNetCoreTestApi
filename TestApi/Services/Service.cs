@@ -9,10 +9,12 @@ namespace TestApi.Services
         where E : class //db entity
         where R : class //return dto
     {
-        protected Expression<Func<E, R>> _toDto;
+        private const int MAX_RECORDS = 1000;
+		protected Expression<Func<E, R>> _toDto;
         protected Func<E, R> AsDto => _toDto.Compile();
         protected readonly MSTestDataContext _dataContext;
         protected readonly ILogger<S> _logger;
+        
 
         public Service(ILogger<S> logger, MSTestDataContext dataContext)
         {
@@ -22,7 +24,7 @@ namespace TestApi.Services
 
         protected IQueryable<R> Dtos(Expression<Func<E, bool>>? predicate = null)
         {
-            var baseQ = _dataContext.Set<E>().AsNoTracking();
+            var baseQ = _dataContext.Set<E>().Take(MAX_RECORDS).AsNoTracking();
             if (predicate != null) baseQ = baseQ.Where(predicate);
             return baseQ.Select(_toDto);
         }
