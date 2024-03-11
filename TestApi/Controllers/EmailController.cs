@@ -19,7 +19,7 @@ namespace TestApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> SendEmail(EmailDto dto)
+        public async Task<ActionResult> SendEmail(EmailDto dto, CancellationToken token)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -40,7 +40,7 @@ namespace TestApi.Controllers
                     client.Credentials = new NetworkCredential(emailSettings.AdminEmail, emailSettings.Password);
                     client.EnableSsl = true;
 
-                    await client.SendMailAsync(message);
+                    await client.SendMailAsync(message, token);
                 }
 
    

@@ -31,8 +31,6 @@ builder.Services.AddTransient<IService<User, CreateUserDto, UserDto>, UserServic
 builder.Services.AddTransient<IService<Event, CreateEventDto, EventDto>, EventService>();
 builder.Services.AddTransient<IService<Event, CreateUserEventDto, EventDto>, UserEventService>();
 
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
