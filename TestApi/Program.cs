@@ -11,6 +11,7 @@ var AllowSpecificOrigins = "_allowSpecificOrigins";
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
 
 // Add services to the container.
+builder.Services.AddMemoryCache();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: AllowSpecificOrigins,
