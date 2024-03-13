@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Test API",
+        Title = "Demo API",
         Description = "A demo .NET Core Web API for managing users and user events." +
         "<br> Users and events represent a one to many relationship, but otherwise they were an arbitrary choice." +
         "<br><br> This is not production-ready." +
