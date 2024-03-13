@@ -33,7 +33,7 @@ namespace TestApi.Controllers
 					return Ok(cachedResult);
 				}
 
-				var expirationTime = DateTimeOffset.Now.AddMinutes(55);
+				var expirationTime = DateTimeOffset.Now.AddMinutes(30);
 				int result = await _dataContext.Database.ExecuteSqlRawAsync("SELECT 1;", token);
 				_memoryCache.Set(HC_KEY, result, expirationTime);
 
