@@ -1,3 +1,16 @@
+// ***********************************************************************
+// Assembly         : TestApi
+// Author           : Shawn Wheeler
+// Created          : 12-29-2023
+//
+// Last Modified By : Shawn Wheeler
+// Last Modified On : 01-05-2024
+// ***********************************************************************
+// <copyright file="UsersController.cs" company="TestApi">
+//     Copyright (c) MyPiTech. All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
 using Microsoft.AspNetCore.Mvc;
 using Test.Data;
 using TestApi.Dtos;
@@ -5,28 +18,47 @@ using TestApi.Services;
 
 namespace TestApi.Controllers
 {
-    [ApiController]
+	/// <summary>
+	/// Class UsersController.
+	/// Implements the <see cref="TestApi.Controllers.ApiControllerBase{TestApi.Controllers.UsersController}" />
+	/// Implements the <see cref="TestApi.Controllers.ICrudController{TestApi.Dtos.CreateUserDto, TestApi.Dtos.UserDto}" />
+	/// </summary>
+	/// <seealso cref="TestApi.Controllers.ApiControllerBase{TestApi.Controllers.UsersController}" />
+	/// <seealso cref="TestApi.Controllers.ICrudController{TestApi.Dtos.CreateUserDto, TestApi.Dtos.UserDto}" />
+	[ApiController]
     [Route("[controller]")]
     public partial class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
     {
-        private readonly IService<User, CreateUserDto, UserDto> _userService; 
-        private readonly IService<Event, CreateUserEventDto, EventDto> _eventService;
+		/// <summary>
+		/// The user service
+		/// </summary>
+		private readonly IService<User, CreateUserDto, UserDto> _userService;
+		/// <summary>
+		/// The event service
+		/// </summary>
+		private readonly IService<Event, CreateUserEventDto, EventDto> _eventService;
 
-        public UsersController(ILogger<UsersController> logger, IService<User, CreateUserDto, UserDto> userService, IService<Event, CreateUserEventDto, EventDto> eventService) : base(logger)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UsersController"/> class.
+		/// </summary>
+		/// <param name="logger">The logger.</param>
+		/// <param name="userService">The user service.</param>
+		/// <param name="eventService">The event service.</param>
+		public UsersController(ILogger<UsersController> logger, IService<User, CreateUserDto, UserDto> userService, IService<Event, CreateUserEventDto, EventDto> eventService) : base(logger)
         {
             _userService = userService;
             _eventService = eventService;
         }
 
-        /// <summary>
-        /// Gets all users.
-        /// </summary>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>All the user dtos.</returns>
-        /// <response code="200">No errors occurred. Users returned.</response>
-        /// <response code="404">No users found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpGet]
+		/// <summary>
+		/// Gets all users.
+		/// </summary>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>All the user dtos.</returns>
+		/// <response code="200">No errors occurred. Users returned.</response>
+		/// <response code="404">No users found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,16 +79,16 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Get a user.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The user dto.</returns>
-        /// <response code="200">No errors occurred. User returned.</response>
-        /// <response code="404">No user found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpGet("{id}")]
+		/// <summary>
+		/// Get a user.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The user dto.</returns>
+		/// <response code="200">No errors occurred. User returned.</response>
+		/// <response code="404">No user found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
@@ -76,15 +108,15 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Creates a new user.
-        /// </summary>
-        /// <param name="dto">The create user dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The new user dto.</returns>
-        /// <response code="201">User created.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPost]
+		/// <summary>
+		/// Creates a new user.
+		/// </summary>
+		/// <param name="dto">The create user dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The new user dto.</returns>
+		/// <response code="201">User created.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
@@ -106,15 +138,16 @@ namespace TestApi.Controllers
 
 
 
-        /// <summary>
-        /// Delete a user.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No user found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpDelete("{id}")]
+		/// <summary>
+		/// Delete a user.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>A Task&lt;ActionResult&gt; representing the asynchronous operation.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No user found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -132,17 +165,17 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Replace a user.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="dto">The create user dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The user dto.</returns>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No user found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPut("{id}")]
+		/// <summary>
+		/// Replace a user.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="dto">The create user dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The user dto.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No user found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -161,17 +194,17 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Update a user.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="dto">The create user dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The user dto.</returns>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No user found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPatch("{id}")]
+		/// <summary>
+		/// Update a user.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="dto">The create user dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The user dto.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No user found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

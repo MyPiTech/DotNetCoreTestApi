@@ -1,20 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// ***********************************************************************
+// Assembly         : TestApi
+// Author           : Shawn Wheeler
+// Created          : 01-04-2024
+//
+// Last Modified By : Shawn Wheeler
+// Last Modified On : 01-07-2024
+// ***********************************************************************
+// <copyright file="UserEventsController.cs" company="TestApi">
+//     Copyright (c) MyPiTech. All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using Microsoft.AspNetCore.Mvc;
 using TestApi.Dtos;
 
 namespace TestApi.Controllers
 {
-    public partial class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
+	/// <summary>
+	/// Class UsersController.
+	/// Implements the <see cref="TestApi.Controllers.ApiControllerBase{TestApi.Controllers.UsersController}" />
+	/// Implements the <see cref="TestApi.Controllers.ICrudController{TestApi.Dtos.CreateUserDto, TestApi.Dtos.UserDto}" />
+	/// </summary>
+	/// <seealso cref="TestApi.Controllers.ApiControllerBase{TestApi.Controllers.UsersController}" />
+	/// <seealso cref="TestApi.Controllers.ICrudController{TestApi.Dtos.CreateUserDto, TestApi.Dtos.UserDto}" />
+	public partial class UsersController : ApiControllerBase<UsersController>, ICrudController<CreateUserDto, UserDto>
     {
-        /// <summary>
-        /// Gets all user events.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>All the event dtos.</returns>
-        /// <response code="200">No errors occurred. User events returned.</response>
-        /// <response code="404">No event found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpGet("{id}/Events")]
+		/// <summary>
+		/// Gets all user events.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>All the event dtos.</returns>
+		/// <response code="200">No errors occurred. User events returned.</response>
+		/// <response code="404">No event found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpGet("{id}/Events")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -35,16 +55,16 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Get a user event.
-        /// </summary>     
-        /// <param name="id">The user id.</param>
-        /// <param name="eventId">The event id.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The event dto.</returns>
-        /// <response code="200">No errors occurred. Event returned.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpGet("{id}/Events/{eventId}")]
+		/// <summary>
+		/// Get a user event.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="eventId">The event id.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The event dto.</returns>
+		/// <response code="200">No errors occurred. Event returned.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpGet("{id}/Events/{eventId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
@@ -63,16 +83,16 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Creates a new user event.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="dto">The create user event dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The new event dto.</returns>
-        /// <response code="201">Event created.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPost("{id}/Events")]
+		/// <summary>
+		/// Creates a new user event.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="dto">The create user event dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The new event dto.</returns>
+		/// <response code="201">Event created.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPost("{id}/Events")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Produces("application/json")]
@@ -92,16 +112,17 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Delete a user event.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="eventId">The event id.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No event found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpDelete("{id}/Events/{eventId}")]
+		/// <summary>
+		/// Delete a user event.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="eventId">The event id.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>A Task&lt;ActionResult&gt; representing the asynchronous operation.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No event found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpDelete("{id}/Events/{eventId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -120,18 +141,18 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Replace a user event.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="eventId">The event id.</param>
-        /// <param name="dto">The create user event dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The event dto.</returns>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No event found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPut("{id}/Events/{eventId}")]
+		/// <summary>
+		/// Replace a user event.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="eventId">The event id.</param>
+		/// <param name="dto">The create user event dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The event dto.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No event found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPut("{id}/Events/{eventId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -150,18 +171,18 @@ namespace TestApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Update a user event.
-        /// </summary>
-        /// <param name="id">The user id.</param>
-        /// <param name="eventId">The event id.</param>
-        /// <param name="dto">The create user event dto.</param>
-        /// <param name="token">The cancellation token.</param>
-        /// <returns>The updated event dto.</returns>
-        /// <response code="204">No errors occurred.</response>
-        /// <response code="404">No event found.</response>
-        /// <response code="400">Unanticipated error occurred.</response>
-        [HttpPatch("{id}/Events/{eventId}")]
+		/// <summary>
+		/// Update a user event.
+		/// </summary>
+		/// <param name="id">The user id.</param>
+		/// <param name="eventId">The event id.</param>
+		/// <param name="dto">The create user event dto.</param>
+		/// <param name="token">The cancellation token.</param>
+		/// <returns>The updated event dto.</returns>
+		/// <response code="204">No errors occurred.</response>
+		/// <response code="404">No event found.</response>
+		/// <response code="400">Unanticipated error occurred.</response>
+		[HttpPatch("{id}/Events/{eventId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
