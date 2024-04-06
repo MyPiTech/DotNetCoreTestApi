@@ -1,3 +1,4 @@
+using TestApi.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -11,14 +12,20 @@ var AllowSpecificOrigins = "_allowSpecificOrigins";
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull);
 
 // Add services to the container.
+
 builder.Services.AddMemoryCache();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: AllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:52518", "https://mango-ground-0c8d1f710.4.azurestaticapps.net", "https://mypitech.com")
-                            .AllowAnyHeader()
+                          policy.WithOrigins(
+                                  "http://localhost:52518", 
+                                  "https://mango-ground-0c8d1f710.4.azurestaticapps.net", 
+                                  "https://mypitech.com",
+							      "https://localhost:7232"
+                              )
+							.AllowAnyHeader()
                             .AllowAnyMethod();
                       });
 });
@@ -56,6 +63,8 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 app.UseCors(AllowSpecificOrigins);
 app.UseSwagger();
@@ -70,5 +79,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ConsoleHub>("/console");
 
 app.Run();
