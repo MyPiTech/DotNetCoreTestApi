@@ -23,8 +23,9 @@ builder.Services.AddCors(options =>
                                   "http://localhost:52518", 
                                   "https://mango-ground-0c8d1f710.4.azurestaticapps.net", 
                                   "https://mypitech.com",
-							      "https://localhost:7232"
-                              )
+							      "https://localhost:7232",
+								  "https://landedmvc.mypitech.com"
+							  )
 							.AllowAnyHeader()
                             .AllowAnyMethod();
                       });
