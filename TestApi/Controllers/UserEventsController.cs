@@ -13,6 +13,7 @@
 // ***********************************************************************
 using Microsoft.AspNetCore.Mvc;
 using TestApi.Dtos;
+using TestApi.Extensions;
 
 namespace TestApi.Controllers
 {
@@ -41,18 +42,24 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<IList<EventDto>>> GetAllAsync(int id, CancellationToken token)
         {
-            try
-            {
-                List<EventDto> dtos = await _eventService.GetAllAsync(e => e.UserId == id, token);
+			try
+			{
+				List<EventDto> dtos = await _eventService.GetAllAsync(i => i.UserId == id, token);
+				await _logger.LogDebugAsync("UserEventsController\\GetAllAsync", dtos);
+				if (dtos.Count == 0)
+				{
+					var response = NoneFoundResult;
+					await _logger.LogWarningAsync("UserEventsController\\GetAllAsync", response);
+					return response;
+				}
 
-                if (dtos.Count == 0) return NoneFoundResult;
-                return dtos;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
+				return Ok(dtos);
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\GetAllAsync");
+				return BadRequest(ex.Message);
+			}
         }
 
 		/// <summary>
@@ -70,17 +77,24 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<EventDto>> GetAsync(int id, int eventId, CancellationToken token)
         {
-            try
-            {
-                var returnDto = await _eventService.GetAsync(e => e.UserId == id && e.Id == eventId, token);
+			try
+			{
+				var returnDto = await _eventService.GetAsync(i => i.UserId == id && i.Id == eventId, token);
+				if (returnDto == null)
+				{
+					var response = NotFoundResult(id);
+					await _logger.LogWarningAsync("UserEventsController\\GetAsync", response);
+					return response;
+				}
 
-                if (returnDto == null) return NotFoundResult(id);
-                return returnDto;
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+				await _logger.LogDebugAsync("UserEventsController\\GetAsync", returnDto);
+				return Ok(returnDto);
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\GetAsync");
+				return BadRequest(ex.Message);
+			}
         }
 
 		/// <summary>
@@ -98,18 +112,25 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<EventDto>> CreateAsync(int id, CreateUserEventDto dto, CancellationToken token)
         {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					var response = BadRequest(ModelState);
+					await _logger.LogWarningAsync("UserEventsController\\CreateAsync", response);
+					return response;
+				}
 
-                var returnDto = await _eventService.CreateAsync(dto, token, id);
-                return CreatedAtAction("Create", new { id = returnDto.Id }, returnDto);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
+				var returnDto = await _eventService.CreateAsync(dto, token, id);
+				var result = CreatedAtAction("Create", new { id = returnDto.Id }, returnDto);
+				await _logger.LogInformationAsync("UserEventsController\\CreateAsync", result);
+				return result;
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\CreateAsync");
+				return BadRequest(ex.Message);
+			}
         }
 
 		/// <summary>
@@ -129,16 +150,17 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult> DeleteAsync(int id, int eventId, CancellationToken token)
         {
-            try
-            {
-                await _eventService.DeleteAsync(e => e.UserId == id && e.Id == eventId, token);
-                return NoContent();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
+			try
+			{
+				await _eventService.DeleteAsync(i => i.UserId == id && i.Id == eventId, token);
+				await _logger.LogInformationAsync("UserEventsController\\DeleteAsync - id:", id);
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\DeleteAsync");
+				return BadRequest(ex.Message);
+			}
         }
 
 		/// <summary>
@@ -159,16 +181,23 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<EventDto>> ReplaceAsync(int id, int eventId, CreateUserEventDto dto, CancellationToken token)
         {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                return await _eventService.ReplaceAsync(e => e.UserId == id && e.Id == eventId, dto, token); ;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					var response = BadRequest(ModelState);
+					await _logger.LogWarningAsync("UserEventsController\\ReplaceAsync", response);
+					return response;
+				}
+				var result = await _eventService.ReplaceAsync(i => i.UserId == id && i.Id == eventId, dto, token);
+				await _logger.LogInformationAsync("UserEventsController\\ReplaceAsync", result);
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\ReplaceAsync");
+				return BadRequest(ex.Message);
+			}
         }
 
 		/// <summary>
@@ -189,16 +218,23 @@ namespace TestApi.Controllers
         [Produces("application/json")]
         public async Task<ActionResult<EventDto>> UpdateAsync(int id, int eventId, CreateUserEventDto dto, CancellationToken token)
         {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                return await _eventService.UpdateAsync(e => e.UserId == id && e.Id == eventId, dto, token); ;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					var response = BadRequest(ModelState);
+					await _logger.LogWarningAsync("UserEventsController\\UpdateAsync", response);
+					return response;
+				}
+				var result = await _eventService.UpdateAsync(i => i.UserId == id && i.Id == eventId, dto, token);
+				await _logger.LogInformationAsync("UserEventsController\\UpdateAsync", result);
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				await _logger.LogErrorAsync(ex, "UserEventsController\\UpdateAsync");
+				return BadRequest(ex.Message);
+			}
         }
     }
 }

@@ -41,8 +41,6 @@ namespace TestApi.Controllers
 		/// </summary>
 		private readonly IService<Event, CreateUserEventDto, EventDto> _eventService;
 
-        private readonly IHubContext<ConsoleHub, IConsoleHub> _consoleHub;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="UsersController"/> class.
 		/// </summary>
@@ -50,16 +48,18 @@ namespace TestApi.Controllers
 		/// <param name="userService">The user service.</param>
 		/// <param name="eventService">The event service.</param>
 		/// <param name="consoleHub"></param>
+		/// <param name="accessor"></param>
 		public UsersController(
-            ILogger<UsersController> logger, 
-            IService<User, CreateUserDto, UserDto> userService, 
-            IService<Event, CreateUserEventDto, EventDto> eventService, 
-            IHubContext<ConsoleHub, IConsoleHub> consoleHub) : base(logger)
+				ILogger<UsersController> logger, 
+				IService<User, CreateUserDto, UserDto> userService, 
+				IService<Event, CreateUserEventDto, EventDto> eventService, 
+				IHubContext<ConsoleHub, IConsoleHub> consoleHub,
+				IHttpContextAccessor accessor
+		) : base(logger, consoleHub, accessor)
         {
             _userService = userService;
             _eventService = eventService;
-            _consoleHub = consoleHub;
-        }
+		}
 
 		/// <summary>
 		/// Gets all users.
@@ -78,20 +78,20 @@ namespace TestApi.Controllers
         {
             try
             {
-                List<UserDto> dtos = await _userService.GetAllAsync(null, token);
-				await _logger.LogDebugAsync("UsersController\\GetAllAsync", _consoleHub, dtos);
+				List<UserDto> dtos = await _userService.GetAllAsync(null, token);
+				await _logger.LogDebugAsync("UsersController\\GetAllAsync", dtos);
 				if (dtos.Count == 0)
 				{
 					var response = NoneFoundResult;
-					await _logger.LogWarningAsync("UsersController\\GetAllAsync", _consoleHub, response);
+					await _logger.LogWarningAsync("UsersController\\GetAllAsync", response);
 					return response;
 				}
 
-				return dtos;
+				return Ok(dtos);
             }
             catch (Exception ex)
             {
-				await _logger.LogErrorAsync(ex, "UsersController\\GetAllAsync", _consoleHub);
+				await _logger.LogErrorAsync(ex, "UsersController\\GetAllAsync");
 				return BadRequest(ex.Message);
             }
         }
@@ -113,20 +113,20 @@ namespace TestApi.Controllers
         {
             try
             {
-                var returnDto = await _userService.GetAsync(u => u.Id == id, token);
+                var returnDto = await _userService.GetAsync(i => i.Id == id, token);
                 if (returnDto == null)
 				{
 					var response = NotFoundResult(id);
-					await _logger.LogWarningAsync("UsersController\\GetAsync", _consoleHub, response);
+					await _logger.LogWarningAsync("UsersController\\GetAsync", response);
 					return response;
 				}
 
-				await _logger.LogDebugAsync("UsersController\\GetAsync", _consoleHub, returnDto);
-                return returnDto;
+				await _logger.LogDebugAsync("UsersController\\GetAsync", returnDto);
+                return Ok(returnDto);
             }
             catch (Exception ex)
             {
-				await _logger.LogErrorAsync(ex, "UsersController\\GetAsync", _consoleHub);
+				await _logger.LogErrorAsync(ex, "UsersController\\GetAsync");
 				return BadRequest(ex.Message);
             }
         }
@@ -150,18 +150,18 @@ namespace TestApi.Controllers
                 if (!ModelState.IsValid)
                 {
                     var response = BadRequest(ModelState);
-                    await _logger.LogWarningAsync("UsersController\\CreateAsync", _consoleHub, response);
+                    await _logger.LogWarningAsync("UsersController\\CreateAsync", response);
                     return response;
                 }
 
                 var returnDto = await _userService.CreateAsync(dto, token);
                 var result = CreatedAtAction("Create", new { id = returnDto.Id }, returnDto);
-                await _logger.LogInformationAsync("UsersController\\CreateAsync", _consoleHub, result);
+                await _logger.LogInformationAsync("UsersController\\CreateAsync", result);
                 return result;
             }
             catch(Exception ex)
             {
-                await _logger.LogErrorAsync(ex, "UsersController\\CreateAsync", _consoleHub);
+                await _logger.LogErrorAsync(ex, "UsersController\\CreateAsync");
                 return BadRequest(ex.Message);
             }
         }
@@ -185,13 +185,13 @@ namespace TestApi.Controllers
         public async Task<ActionResult> DeleteAsync(int id, CancellationToken token)
         {
             try {
-                await _userService.DeleteAsync(u => u.Id == id, token);
-				await _logger.LogInformationAsync("UsersController\\DeleteAsync - id:", _consoleHub, id);
+                await _userService.DeleteAsync(i => i.Id == id, token);
+				await _logger.LogInformationAsync("UsersController\\DeleteAsync - id:", id);
 				return NoContent();
             }
             catch(Exception ex)
             {
-				await _logger.LogErrorAsync(ex, "UsersController\\DeleteAsync", _consoleHub);
+				await _logger.LogErrorAsync(ex, "UsersController\\DeleteAsync");
 				return BadRequest(ex.Message);
             }
         }
@@ -218,16 +218,16 @@ namespace TestApi.Controllers
                 if (!ModelState.IsValid)
 				{
 					var response = BadRequest(ModelState);
-					await _logger.LogWarningAsync("UsersController\\ReplaceAsync", _consoleHub, response);
+					await _logger.LogWarningAsync("UsersController\\ReplaceAsync", response);
 					return response;
 				}
-				var result = await _userService.ReplaceAsync(u => u.Id == id, dto, token);
-				await _logger.LogInformationAsync("UsersController\\ReplaceAsync", _consoleHub, result);
-				return result;
+				var result = await _userService.ReplaceAsync(i => i.Id == id, dto, token);
+				await _logger.LogInformationAsync("UsersController\\ReplaceAsync", result);
+				return Ok(result);
 			}
             catch (Exception ex)
             {
-				await _logger.LogErrorAsync(ex, "UsersController\\ReplaceAsync", _consoleHub);
+				await _logger.LogErrorAsync(ex, "UsersController\\ReplaceAsync");
 				return BadRequest(ex.Message);
             }
         }
@@ -254,16 +254,16 @@ namespace TestApi.Controllers
                 if (!ModelState.IsValid)
 				{
 					var response = BadRequest(ModelState);
-					await _logger.LogWarningAsync("UsersController\\UpdateAsync", _consoleHub, response);
+					await _logger.LogWarningAsync("UsersController\\UpdateAsync", response);
 					return response;
 				}
-				var result = await _userService.UpdateAsync(u => u.Id == id, dto, token);
-				await _logger.LogInformationAsync("UsersController\\UpdateAsync", _consoleHub, result);
-				return result;
+				var result = await _userService.UpdateAsync(i => i.Id == id, dto, token);
+				await _logger.LogInformationAsync("UsersController\\UpdateAsync", result);
+				return Ok(result);
             }
             catch (Exception ex)
             {
-				await _logger.LogErrorAsync(ex, "UsersController\\UpdateAsync", _consoleHub);
+				await _logger.LogErrorAsync(ex, "UsersController\\UpdateAsync");
 				return BadRequest(ex.Message);
             }
         }
