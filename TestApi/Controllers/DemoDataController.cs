@@ -59,16 +59,18 @@ namespace TestApi.Controllers
 		public async Task<ActionResult> AddDemoDataAsync(CancellationToken token)
 		{
             try {
-				var dance = new Event
-				{
-					Title = "The Enchantment Under The Sea Dance",
-					Location = "Hill Valley High School",
-					Duration = 90,
-					Start = new DateTime(1955, 11, 12, 20, 0, 0)
-				};
+				
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Marty" && u.LastName == "McFly"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "Marty",
@@ -82,6 +84,14 @@ namespace TestApi.Controllers
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Emmett" && u.LastName == "Brown"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "Emmett",
@@ -95,6 +105,14 @@ namespace TestApi.Controllers
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Biff" && u.LastName == "Tannen"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "Biff",
@@ -108,6 +126,14 @@ namespace TestApi.Controllers
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Lorraine" && u.LastName == "Baines"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "Lorraine",
@@ -121,6 +147,14 @@ namespace TestApi.Controllers
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "George" && u.LastName == "McFly"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "George",
@@ -134,6 +168,14 @@ namespace TestApi.Controllers
 
 				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Mr." && u.LastName == "Strickland"))
 				{
+					var dance = new Event
+					{
+						Title = "The Enchantment Under The Sea Dance",
+						Location = "Hill Valley High School",
+						Duration = 90,
+						Start = new DateTime(1955, 11, 12, 20, 0, 0)
+					};
+
 					var user = new User
 					{
 						FirstName = "Mr.",
