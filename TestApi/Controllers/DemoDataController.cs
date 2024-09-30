@@ -166,7 +166,7 @@ namespace TestApi.Controllers
 					await _dataContext.SaveChangesAsync(token);
 				};
 
-				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Mr." && u.LastName == "Strickland"))
+				if (!await _dataContext.Users.AnyAsync(u => u.FirstName == "Stanford" && u.LastName == "Strickland"))
 				{
 					var dance = new Event
 					{
@@ -178,7 +178,7 @@ namespace TestApi.Controllers
 
 					var user = new User
 					{
-						FirstName = "Mr.",
+						FirstName = "Stanford",
 						LastName = "Strickland",
 						Notes = "No McFly ever amounted to anything in the history of Hill Valley!"
 					};
